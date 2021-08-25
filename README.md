@@ -4,7 +4,7 @@ command line tool to send a message to all AWS SNS topic subscribers
 # usage:
 ```
 You must supply a subject, message and a topic ARN.
-Your default AWS credentials must have permissions to publish messages to the given topic.
+Your default AWS credentials must have permission to publish messages to the given topic.
 
 Usage: sns_publish -s SUBJECT -m MESSAGE -t TOPIC-ARN
 ```
