@@ -1,41 +1,28 @@
-// snippet-comment:[These are tags for the AWS doc team's sample catalog. Do not remove.]
-// snippet-sourceauthor:[Doug-AWS]
-// snippet-sourcedescription:[SnsPublish.go -m MESSAGE -t TOPIC-ARN sends MESSAGE to all the users subscribed to the SNS topic with the ARN TOPIC-ARN.]
-// snippet-keyword:[Amazon Simple Notification Service]
-// snippet-keyword:[Amazon SNS]
-// snippet-keyword:[Publish function]
-// snippet-keyword:[Go]
-// snippet-sourcesyntax:[go]
-// snippet-service:[sns]
-// snippet-keyword:[Code Sample]
-// snippet-sourcetype:[full-example]
-// snippet-sourcedate:[2020-1-6]
 /*
-   Copyright 2010-2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+sns_publish.go
+-John Taylor
+Aug 25 2021
 
-   This file is licensed under the Apache License, Version 2.0 (the "License").
-   You may not use this file except in compliance with the License. A copy of
-   the License is located at
+Command line tool to publish a message to an AWS SNS topic
 
-    http://aws.amazon.com/apache2.0/
+Adapted from:
+https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/sns-example-publish.html
 
-   This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied. See the License for the
-   specific language governing permissions and limitations under the License.
 */
-// snippet-start:[sns.go.publish]
 package main
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sns"
+	"strings"
 
 	"flag"
 	"fmt"
 	"os"
 )
 
-const pgmVersion string = "1.0.0"
+const pgmVersion string = "1.0.1"
 const pgmUrl string = "https://github.com/jftuga/sns_publish"
 
 func main() {
@@ -56,25 +43,37 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Initialize a session that the SDK will use to load
-	// credentials from the shared credentials file. (~/.aws/credentials).
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
+	slots := strings.Split(*topicPtr, ":")
+	if len(slots) != 6 {
+		fmt.Println()
+		fmt.Printf("Invalid TOPIC-ARN, %s\n", *topicPtr)
+		fmt.Println("This should contain 6 colon-delimited fields.")
+		fmt.Println()
+		os.Exit(1)
+	}
+	region := slots[3]
+
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String(region),
+	})
+	if err != nil {
+		fmt.Println()
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
 
 	svc := sns.New(sess)
-
 	result, err := svc.Publish(&sns.PublishInput{
 		Subject:  subjectPtr,
 		Message:  msgPtr,
 		TopicArn: topicPtr,
 	})
 	if err != nil {
+		fmt.Println()
 		fmt.Println(err.Error())
+		fmt.Println()
 		os.Exit(1)
 	}
 
 	fmt.Println(*result.MessageId)
 }
-
-// snippet-end:[sns.go.publish]
