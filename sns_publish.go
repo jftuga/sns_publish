@@ -22,7 +22,7 @@ import (
 	"os"
 )
 
-const pgmVersion string = "1.0.1"
+const pgmVersion string = "1.0.2"
 const pgmUrl string = "https://github.com/jftuga/sns_publish"
 
 func main() {
