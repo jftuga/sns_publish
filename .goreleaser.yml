@@ -1,7 +1,7 @@
-project_name: sqs_publish
+project_name: sns_publish
 build:
   main: .
-  binary: sqs_publish
+  binary: sns_publish
   env:
     - CGO_ENABLED=0
   goos:
