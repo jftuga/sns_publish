@@ -22,14 +22,14 @@ import (
 	"os"
 )
 
-const pgmVersion string = "1.0.2"
+const pgmVersion string = "1.0.3"
 const pgmUrl string = "https://github.com/jftuga/sns_publish"
 
 func main() {
 	msgPtr := flag.String("m", "", "The message to send to the subscribed users of the topic")
 	subjectPtr := flag.String("s", "", "The message subject")
 	topicPtr := flag.String("t", "", "The ARN of the topic to which the user subscribes")
-
+	profilePtr := flag.String("p", "", "Profile name to use")
 	flag.Parse()
 
 	if *msgPtr == "" || *topicPtr == "" {
@@ -39,7 +39,7 @@ func main() {
 		fmt.Println("You must supply a subject, message and a topic ARN.")
 		fmt.Println("Your default AWS credentials must have permission to publish messages to the given topic.")
 		fmt.Println("")
-		fmt.Println("Usage: sns_publish -s SUBJECT -m MESSAGE -t TOPIC-ARN")
+		fmt.Println("Usage: sns_publish -p PROFILE -s SUBJECT -m MESSAGE -t TOPIC-ARN")
 		os.Exit(1)
 	}
 
@@ -53,8 +53,11 @@ func main() {
 	}
 	region := slots[3]
 
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(region),
+	sess, err := session.NewSessionWithOptions(session.Options{
+		Profile: *profilePtr,
+		Config: aws.Config{
+			Region: aws.String(region),
+		},
 	})
 	if err != nil {
 		fmt.Println()
