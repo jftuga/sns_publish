@@ -22,7 +22,7 @@ import (
 	"os"
 )
 
-const pgmVersion string = "1.0.3"
+const pgmVersion string = "1.0.4"
 const pgmUrl string = "https://github.com/jftuga/sns_publish"
 
 func main() {
@@ -37,7 +37,7 @@ func main() {
 		fmt.Println(pgmUrl)
 		fmt.Println("")
 		fmt.Println("You must supply a subject, message and a topic ARN.")
-		fmt.Println("Your default AWS credentials must have permission to publish messages to the given topic.")
+		fmt.Println("You can optionally pass -p to use a profile other than the default.")
 		fmt.Println("")
 		fmt.Println("Usage: sns_publish -p PROFILE -s SUBJECT -m MESSAGE -t TOPIC-ARN")
 		os.Exit(1)
@@ -56,7 +56,8 @@ func main() {
 	sess, err := session.NewSessionWithOptions(session.Options{
 		Profile: *profilePtr,
 		Config: aws.Config{
-			Region: aws.String(region),
+			Region:                        aws.String(region),
+			CredentialsChainVerboseErrors: aws.Bool(true),
 		},
 	})
 	if err != nil {
