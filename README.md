@@ -5,8 +5,7 @@ You must supply a subject, message (or a file) and a topic ARN.
 * You can optionally pass -p to use a profile other than the default.
 * You can optionally pass -f to publish a file (instead of a message with -m).
 
-
-# usage:
+## Usage
 ```
 Usage: sns_publish -p PROFILE -s SUBJECT [-m MESSAGE|-f FILE] -t TOPIC-ARN
 
@@ -20,10 +19,9 @@ Usage: sns_publish -p PROFILE -s SUBJECT [-m MESSAGE|-f FILE] -t TOPIC-ARN
     	The message subject; surround in quotes
   -t string
     	The SNS topic ARN; starts with 'arn:'
-
-
+  -v	Output version and then exit
 ```
 
-# adopted from:
-* https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/sns-example-publish.html
-* https://github.com/awsdocs/aws-doc-sdk-examples/blob/master/go/example_code/sns/SnsPublish.go
+## Installation
+* macOS: `brew update; brew install jftuga/tap/sns_publish`
+* Binaries for Linux, macOS and Windows are provided in the [releases](https://github.com/jftuga/sns_publish/releases) section.

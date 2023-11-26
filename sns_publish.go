@@ -4,17 +4,14 @@ sns_publish.go
 Aug 25 2021
 
 Command line tool to publish a message to an AWS SNS topic
-
-Adapted from:
-https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/sns-example-publish.html
-
 */
+
 package main
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/sns"
+	"context"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"strings"
 
 	"flag"
@@ -22,7 +19,8 @@ import (
 	"os"
 )
 
-const pgmVersion string = "1.1.0"
+const pgmName string = "sns_publish"
+const pgmVersion string = "1.2.0"
 const pgmUrl string = "https://github.com/jftuga/sns_publish"
 const maxMsgSize int = 262144
 
@@ -32,7 +30,13 @@ func main() {
 	topicPtr := flag.String("t", "", "The SNS topic ARN; starts with 'arn:'")
 	profilePtr := flag.String("p", "", "Profile name to use; optional")
 	filenamePtr := flag.String("f", "", "Send a file (instead of a message with -m)")
+	version := flag.Bool("v", false, "Output version and then exit")
 	flag.Parse()
+
+	if *version {
+		fmt.Printf("%v v%v\n%v\n", pgmName, pgmVersion, pgmUrl)
+		return
+	}
 
 	if (*msgPtr == "" && *filenamePtr == "") || *topicPtr == "" {
 		fmt.Printf("sns_publish, v%s\n", pgmVersion)
@@ -62,22 +66,13 @@ func main() {
 		os.Exit(1)
 	}
 	region := slots[3]
-
-	sess, err := session.NewSessionWithOptions(session.Options{
-		Profile: *profilePtr,
-		Config: aws.Config{
-			Region:                        aws.String(region),
-			CredentialsChainVerboseErrors: aws.Bool(true),
-		},
-	})
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(region), config.WithSharedConfigProfile(*profilePtr))
 	if err != nil {
-		fmt.Println()
-		fmt.Println(err.Error())
-		os.Exit(1)
+		fmt.Fprintf(os.Stderr, "\n%v\n", err)
+		os.Exit(255)
 	}
 
 	var message *string
-
 	if len(*msgPtr) > 0 {
 		message = msgPtr
 	} else {
@@ -105,8 +100,10 @@ func main() {
 		message = &m
 	}
 
-	svc := sns.New(sess)
-	result, err := svc.Publish(&sns.PublishInput{
+	ctx := context.TODO()
+	snsClient := sns.NewFromConfig(cfg)
+
+	result, err := snsClient.Publish(ctx, &sns.PublishInput{
 		Subject:  subjectPtr,
 		Message:  message,
 		TopicArn: topicPtr,
